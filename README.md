@@ -1,8 +1,8 @@
-# 💬 SENAI TEC Chat - WebSocket
+# SENAI TEC Chat - WebSocket
 
 Aplicação de chat em tempo real feita com Node.js e WebSocket.
 
-## 📋 O que foi feito
+## O que foi feito
 
 - Cadastro de usuários
 - Login com usuário e senha
@@ -14,7 +14,7 @@ Aplicação de chat em tempo real feita com Node.js e WebSocket.
 
 ---
 
-## 🚀 Como rodar
+## Como rodar
 
 ### 1. Instalar as dependências (só na primeira vez)
 
@@ -30,8 +30,8 @@ node server.js
 
 Vai aparecer no terminal:
 ```
-✅ Servidor rodando em: http://localhost:3000
-🔌 WebSocket pronto na porta 3000
+Servidor rodando em: http://localhost:3000
+WebSocket pronto na porta 3000
 ```
 
 ### 3. Abrir no navegador
@@ -40,7 +40,7 @@ Acesse: **http://localhost:3000**
 
 ---
 
-## 🧪 Como testar
+## Como testar
 
 1. Abra **duas abas** do navegador em `http://localhost:3000`
 2. Em cada aba, cadastre um usuário diferente
@@ -50,17 +50,13 @@ Acesse: **http://localhost:3000**
 6. Envie mensagens e veja chegando em tempo real!
 7. Para testar mensagem privada: clique no nome de um membro antes de enviar
 
----
-
-## 📁 Arquivos
+## Arquivos
 
 - `server.js` — Servidor Node.js com WebSocket
 - `index.html` — Interface do chat (frontend)
 - `package.json` — Configurações do projeto Node.js
 
----
-
-## ⚙️ Tecnologias usadas
+## Tecnologias usadas
 
 - **Node.js** — Plataforma JavaScript no servidor
 - **ws** — Biblioteca WebSocket para Node.js
