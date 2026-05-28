@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENAI TEC - Chat</title>
+    <style>
+        /* Reset básico */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #111;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ---- TELAS ---- */
+        .tela {
+            display: none;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        .tela.ativa { display: flex; }
+
+        /* ---- LOGIN / CADASTRO ---- */
+        .caixa-login {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 36px 32px;
+            width: 360px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .caixa-login h1 {
+            text-align: center;
+            font-size: 22px;
+            color: #128c7e;
+            margin-bottom: 4px;
+        }
+
+        .caixa-login h2 {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            font-weight: normal;
+            margin-bottom: 24px;
+        }
+
+        .campo { margin-bottom: 14px; }
+
+        .campo label {
+            display: block;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .campo input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #111;
+            background: #fafafa;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .campo input:focus { border-color: #128c7e; background: #fff; }
+
+        .btn {
+            width: 100%;
+            padding: 11px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.15s;
+        }
+        .btn:hover { opacity: 0.88; }
+
+        .btn-verde { background-color: #128c7e; color: #fff; }
+        .btn-cinza { background-color: #f0f2f5; color: #333; border: 1px solid #ddd; }
+        .btn-pequeno { width: auto; padding: 7px 14px; font-size: 13px; margin-bottom: 0; }
+
+        .aviso {
+            padding: 9px 12px;
+            border-radius: 7px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .aviso.erro   { background: #fdecea; border: 1px solid #f5c6c2; color: #c0392b; display: block; }
+        .aviso.sucesso { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; display: block; }
+
+        .link-texto { text-align: center; font-size: 13px; color: #888; margin-top: 4px; }
+        .link-texto a { color: #128c7e; cursor: pointer; text-decoration: none; }
+        .link-texto a:hover { text-decoration: underline; }
+
+        /* ---- TELA DO CHAT ---- */
+        #telaChatContainer {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f0f2f5;
+        }
+
+        /* Cabeçalho */
+        .chat-header {
+            background: #128c7e;
+            color: #fff;
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 { font-size: 17px; font-weight: 600; }
+        .chat-header span { font-size: 13px; opacity: 0.9; }
+
+        /* Layout */
+        .chat-body { display: flex; flex: 1; overflow: hidden; }
+
+        /* ---- SIDEBAR SALAS ---- */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 14px 10px;
+        }
+
+        .sidebar h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .criar-sala { display: flex; gap: 6px; margin-bottom: 14px; }
+
+        .criar-sala input {
+            flex: 1;
+            padding: 7px 10px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 13px;
+            color: #111;
+            outline: none;
+            background: #fafafa;
+        }
+        .criar-sala input:focus { border-color: #128c7e; }
+
+        #listaSalas { list-style: none; overflow-y: auto; flex: 1; }
+
+        #listaSalas li {
+            padding: 9px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+            transition: background 0.12s;
+        }
+        #listaSalas li:hover { background: #f0f2f5; }
+        #listaSalas li.ativa { background: #e7f5f3; color: #128c7e; font-weight: 600; }
+
+        /* ---- ÁREA DE MENSAGENS ---- */
+        .chat-main { flex: 1; display: flex; flex-direction: column; }
+
+        #mensagens {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #ece5dd;
+        }
+
+        /* Bolhas */
+        .mensagem {
+            max-width: 62%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .mensagem.minha {
+            background: #dcf8c6;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .mensagem.outro {
+            background: #fff;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #eee;
+        }
+
+        .mensagem.privada {
+            background: #f3e5f5;
+            border: 1px solid #ce93d8;
+        }
+
+        .mensagem .remetente {
+            font-size: 12px;
+            font-weight: 600;
+            color: #128c7e;
+            margin-bottom: 2px;
+        }
+
+        .mensagem .tag-privada {
+            font-size: 11px;
+            color: #8e24aa;
+            margin-bottom: 2px;
+        }
+
+        .mensagem .hora {
+            font-size: 11px;
+            color: #999;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .aviso-sistema {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            background: rgba(255,255,255,0.6);
+            padding: 4px 12px;
+            border-radius: 10px;
+            align-self: center;
+        }
+
+        /* ---- SIDEBAR MEMBROS ---- */
+        .sidebar-membros {
+            width: 190px;
+            background: #fff;
+            border-left: 1px solid #ddd;
+            padding: 14px 10px;
+            overflow-y: auto;
+        }
+
+        .sidebar-membros h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .sidebar-membros p {
+            font-size: 11px;
+            color: #bbb;
+            margin-bottom: 10px;
+        }
+
+        #listaMembros { list-style: none; }
+
+        #listaMembros li {
+            padding: 8px 10px;
+            font-size: 13px;
+            color: #333;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+        #listaMembros li:hover { background: #f0f2f5; }
+
+        #listaMembros li.selecionado {
+            background: #f3e5f5;
+            border: 1px solid #ce93d8;
+            color: #6a1b9a;
+        }
+
+        .bolinha-verde {
+            width: 8px; height: 8px;
+            background: #25d366;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ---- BARRA DE ENVIO ---- */
+        .barra-envio {
+            background: #f0f2f5;
+            border-top: 1px solid #ddd;
+            padding: 10px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #avisoPrivado { font-size: 12px; color: #8e24aa; display: none; }
+        #avisoPrivado.ativo { display: block; }
+
+        .linha-envio { display: flex; gap: 8px; }
+
+        #campoMensagem {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 22px;
+            font-size: 14px;
+            color: #111;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #campoMensagem:focus { border-color: #128c7e; }
+        #campoMensagem:disabled { background: #f5f5f5; cursor: not-allowed; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- TELA 1: LOGIN -->
+    <div class="tela ativa" id="telaLogin">
+        <div class="caixa-login">
+            <h1>SENAI TEC</h1>
+            <h2>Chat em tempo real</h2>
+
+            <div id="avisoLogin" class="aviso"></div>
+
+            <div class="campo">
+                <label>Usuário</label>
+                <input type="text" id="loginUsuario" placeholder="Seu nome de usuário">
+            </div>
+
+            <div class="campo">
+                <label>Senha</label>
+                <input type="password" id="loginSenha" placeholder="Sua senha">
+            </div>
+
+            <button class="btn btn-verde" onclick="fazerLogin()">Entrar</button>
+
+            <p class="link-texto">
+                Não tem conta? <a onclick="mostrarTela('telaCadastro')">Cadastre-se</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- TELA 2: CADASTRO -->
+    <div class="tela" id="telaCadastro">
+        <div class="caixa-login">
+            <h1>SENAI TEC</h1>
+            <h2>Criar nova conta</h2>
+
+            <div id="avisoCadastro" class="aviso"></div>
+
+            <div class="campo">
+                <label>Usuário</label>
+                <input type="text" id="cadUsuario" placeholder="Escolha um nome de usuário">
+            </div>
+
+            <div class="campo">
+                <label>Senha</label>
+                <input type="password" id="cadSenha" placeholder="Escolha uma senha">
+            </div>
+
+            <button class="btn btn-verde" onclick="fazerCadastro()">Cadastrar</button>
+
+            <p class="link-texto">
+                Já tem conta? <a onclick="mostrarTela('telaLogin')">Fazer login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- TELA 3: CHAT -->
+    <div class="tela" id="telaChat">
+        <div id="telaChatContainer">
+
+            <div class="chat-header">
+                <h2>SENAI TEC Chat</h2>
+                <div>
+                    <span id="nomeUsuarioLogado"></span>
+                    &nbsp;
+                    <button class="btn btn-cinza btn-pequeno" onclick="sair()">Sair</button>
+                </div>
+            </div>
+
+            <div class="chat-body">
+
+                <!-- Sidebar Salas -->
+                <div class="sidebar">
+                    <h3>Salas</h3>
+                    <div class="criar-sala">
+                        <input type="text" id="nomeSala" placeholder="Nova sala...">
+                        <button class="btn btn-verde btn-pequeno" onclick="criarSala()">+</button>
+                    </div>
+                    <ul id="listaSalas">
+                        <li style="color:#bbb; font-size:12px; cursor:default;">Nenhuma sala ainda</li>
+                    </ul>
+                </div>
+
+                <!-- Mensagens -->
+                <div class="chat-main">
+                    <div id="mensagens">
+                        <div class="aviso-sistema">Selecione uma sala para começar</div>
+                    </div>
+
+                    <div class="barra-envio">
+                        <div id="avisoPrivado">Mensagem privada para os selecionados</div>
+                        <div class="linha-envio">
+                            <input
+                                type="text"
+                                id="campoMensagem"
+                                placeholder="Selecione uma sala primeiro..."
+                                disabled
+                                onkeydown="if(event.key==='Enter') enviarMensagem()">
+                            <button class="btn btn-verde btn-pequeno" onclick="enviarMensagem()">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Membros -->
+                <div class="sidebar-membros">
+                    <h3>Membros</h3>
+                    <p>Clique para envio privado</p>
+                    <ul id="listaMembros">
+                        <li style="color:#bbb; font-size:12px; cursor:default; padding:4px;">—</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // =====================================================
+        // VARIÁVEIS GLOBAIS
+        // =====================================================
+
+        let ws = null;
+        let meuUsuario = '';
+        let minhasSalaAtual = '';
+        let membrosSelecionados = [];
+
+        // =====================================================
+        // CONECTAR AO WEBSOCKET
+        // =====================================================
+
+        function conectarWebSocket() {
+            ws = new WebSocket('ws://localhost:3000');
+
+            ws.onopen = function () {
+                console.log('Conectado ao servidor WebSocket!');
+            };
+
+            ws.onmessage = function (evento) {
+                const dados = JSON.parse(evento.data);
+                tratarMensagemServidor(dados);
+            };
+
+            ws.onclose = function () {
+                console.log('Conexão encerrada');
+            };
+
+            ws.onerror = function (erro) {
+                console.error('Erro no WebSocket:', erro);
+            };
+        }
+
+        conectarWebSocket();
+
+        // =====================================================
+        // TRATAR MENSAGENS DO SERVIDOR
+        // =====================================================
+
+        function tratarMensagemServidor(dados) {
+
+            if (dados.tipo === 'resposta') {
+
+                if (dados.acao === 'cadastrar') {
+                    mostrarAviso('avisoCadastro', dados.sucesso ? 'sucesso' : 'erro', dados.mensagem);
+                    if (dados.sucesso) {
+                        setTimeout(() => mostrarTela('telaLogin'), 1500);
+                    }
+                }
+
+                else if (dados.acao === 'login') {
+                    if (dados.sucesso) {
+                        mostrarTela('telaChat');
+                        document.getElementById('nomeUsuarioLogado').textContent = '' + meuUsuario;
+                        atualizarListaSalas(dados.salas);
+                    } else {
+                        mostrarAviso('avisoLogin', 'erro', dados.mensagem);
+                    }
+                }
+
+                else if (dados.acao === 'criarSala') {
+                    if (dados.sucesso) {
+                        atualizarListaSalas(dados.salas);
+                        document.getElementById('nomeSala').value = '';
+                    } else {
+                        alert(dados.mensagem);
+                    }
+                }
+
+                else if (dados.acao === 'entrarSala') {
+                    if (dados.sucesso) {
+                        minhasSalaAtual = dados.sala;
+                        document.getElementById('mensagens').innerHTML = '';
+                        adicionarAvisoSistema('Você entrou na sala: ' + dados.sala);
+                        atualizarMembros(dados.membros);
+                        document.getElementById('campoMensagem').disabled = false;
+                        document.getElementById('campoMensagem').placeholder = 'Digite uma mensagem...';
+                        membrosSelecionados = [];
+                        atualizarAvisoPrivado();
+                    }
+                }
+
+                else if (dados.acao === 'listarSalas') {
+                    atualizarListaSalas(dados.salas);
+                }
+            }
+
+            else if (dados.tipo === 'avisoEntrada') {
+                adicionarAvisoSistema(dados.mensagem);
+                atualizarMembros(dados.membros);
+            }
+
+            else if (dados.tipo === 'novaMensagem') {
+                exibirMensagem(dados);
+            }
+
+            else if (dados.tipo === 'erro') {
+                alert('Erro: ' + dados.mensagem);
+            }
+        }
+
+        // =====================================================
+        // AÇÕES DO USUÁRIO
+        // =====================================================
+
+        function fazerCadastro() {
+            const username = document.getElementById('cadUsuario').value.trim();
+            const password = document.getElementById('cadSenha').value.trim();
+
+            if (!username || !password) {
+                mostrarAviso('avisoCadastro', 'erro', 'Preencha todos os campos!');
+                return;
+            }
+
+            ws.send(JSON.stringify({ tipo: 'cadastrar', username, password }));
+        }
+
+        function fazerLogin() {
+            const username = document.getElementById('loginUsuario').value.trim();
+            const password = document.getElementById('loginSenha').value.trim();
+
+            if (!username || !password) {
+                mostrarAviso('avisoLogin', 'erro', 'Preencha todos os campos!');
+                return;
+            }
+
+            meuUsuario = username;
+            ws.send(JSON.stringify({ tipo: 'login', username, password }));
+        }
+
+        function criarSala() {
+            const nome = document.getElementById('nomeSala').value.trim();
+            if (!nome) return;
+            ws.send(JSON.stringify({ tipo: 'criarSala', nomeSala: nome }));
+        }
+
+        function entrarSala(nomeSala) {
+            ws.send(JSON.stringify({ tipo: 'entrarSala', nomeSala }));
+        }
+
+        function enviarMensagem() {
+            const campo = document.getElementById('campoMensagem');
+            const texto = campo.value.trim();
+            if (!texto || !minhasSalaAtual) return;
+
+            ws.send(JSON.stringify({
+                tipo: 'enviarMensagem',
+                texto,
+                destinatarios: membrosSelecionados.length > 0 ? membrosSelecionados : null
+            }));
+
+            campo.value = '';
+        }
+
+        // =====================================================
+        // FUNÇÕES DE INTERFACE
+        // =====================================================
+
+        function mostrarTela(id) {
+            document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+            document.getElementById(id).classList.add('ativa');
+        }
+
+        function mostrarAviso(id, tipo, mensagem) {
+            const el = document.getElementById(id);
+            el.className = 'aviso ' + tipo;
+            el.textContent = mensagem;
+        }
+
+        function atualizarListaSalas(salas) {
+            const lista = document.getElementById('listaSalas');
+            lista.innerHTML = '';
+
+            if (!salas || salas.length === 0) {
+                lista.innerHTML = '<li style="color:#bbb; font-size:12px; cursor:default;">Nenhuma sala ainda</li>';
+                return;
+            }
+
+            salas.forEach(sala => {
+                const li = document.createElement('li');
+                li.textContent = '# ' + sala.nome;
+                if (sala.nome === minhasSalaAtual) li.classList.add('ativa');
+                li.onclick = () => entrarSala(sala.nome);
+                lista.appendChild(li);
+            });
+        }
+
+        function atualizarMembros(membros) {
+            const lista = document.getElementById('listaMembros');
+            lista.innerHTML = '';
+
+            if (!membros || membros.length === 0) {
+                lista.innerHTML = '<li style="color:#bbb; font-size:12px; cursor:default; padding:4px;">Ninguém aqui</li>';
+                return;
+            }
+
+            membros.forEach(username => {
+                const li = document.createElement('li');
+                li.innerHTML = '<span class="bolinha-verde"></span>' + username;
+
+                if (username === meuUsuario) {
+                    li.innerHTML += ' <span style="font-size:11px; color:#128c7e;">(você)</span>';
+                    li.style.cursor = 'default';
+                } else {
+                    li.onclick = () => toggleSelecionarMembro(username, li);
+                }
+
+                lista.appendChild(li);
+            });
+        }
+
+        function toggleSelecionarMembro(username, elemento) {
+            const indice = membrosSelecionados.indexOf(username);
+            if (indice === -1) {
+                membrosSelecionados.push(username);
+                elemento.classList.add('selecionado');
+            } else {
+                membrosSelecionados.splice(indice, 1);
+                elemento.classList.remove('selecionado');
+            }
+            atualizarAvisoPrivado();
+        }
+
+        function atualizarAvisoPrivado() {
+            const aviso = document.getElementById('avisoPrivado');
+            if (membrosSelecionados.length > 0) {
+                aviso.textContent = 'Privado para: ' + membrosSelecionados.join(', ');
+                aviso.classList.add('ativo');
+            } else {
+                aviso.classList.remove('ativo');
+            }
+        }
+
+        function adicionarAvisoSistema(texto) {
+            const div = document.createElement('div');
+            div.className = 'aviso-sistema';
+            div.textContent = texto;
+            const area = document.getElementById('mensagens');
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function exibirMensagem(dados) {
+            const area = document.getElementById('mensagens');
+            const div = document.createElement('div');
+            const ehMinha = dados.remetente === meuUsuario;
+
+            div.className = 'mensagem';
+            if (ehMinha) div.classList.add('minha');
+            else div.classList.add('outro');
+            if (dados.privada) div.classList.add('privada');
+
+            let html = '';
+
+            if (!ehMinha) {
+                html += '<div class="remetente">' + dados.remetente + '</div>';
+            }
+
+            if (dados.privada) {
+                const destinos = dados.destinatarios ? dados.destinatarios.join(', ') : '';
+                html += '<div class="tag-privada">Privado → ' + destinos + '</div>';
+            }
+
+            html += '<div>' + dados.texto + '</div>';
+            html += '<div class="hora">' + dados.hora + '</div>';
+
+            div.innerHTML = html;
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
+        }
+
+        function sair() {
+            meuUsuario = '';
+            minhasSalaAtual = '';
+            membrosSelecionados = [];
+            ws.close();
+            setTimeout(() => {
+                conectarWebSocket();
+                mostrarTela('telaLogin');
+                document.getElementById('loginUsuario').value = '';
+                document.getElementById('loginSenha').value = '';
+            }, 300);
+        }
+    </script>
+
+</body>
+</html>
