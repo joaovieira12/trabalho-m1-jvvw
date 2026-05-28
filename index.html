@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENAI TEC - Chat</title>
     <style>
-        /* Reset básico */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -18,7 +17,6 @@
             align-items: center;
         }
 
-        /* ---- TELAS ---- */
         .tela {
             display: none;
             width: 100%;
@@ -28,7 +26,6 @@
         }
         .tela.ativa { display: flex; }
 
-        /* ---- LOGIN / CADASTRO ---- */
         .caixa-login {
             background: #fff;
             border: 1px solid #ddd;
@@ -107,7 +104,6 @@
         .link-texto a { color: #128c7e; cursor: pointer; text-decoration: none; }
         .link-texto a:hover { text-decoration: underline; }
 
-        /* ---- TELA DO CHAT ---- */
         #telaChatContainer {
             width: 100%;
             height: 100vh;
@@ -116,7 +112,6 @@
             background: #f0f2f5;
         }
 
-        /* Cabeçalho */
         .chat-header {
             background: #128c7e;
             color: #fff;
@@ -129,10 +124,8 @@
         .chat-header h2 { font-size: 17px; font-weight: 600; }
         .chat-header span { font-size: 13px; opacity: 0.9; }
 
-        /* Layout */
         .chat-body { display: flex; flex: 1; overflow: hidden; }
 
-        /* ---- SIDEBAR SALAS ---- */
         .sidebar {
             width: 210px;
             background: #fff;
@@ -178,7 +171,6 @@
         #listaSalas li:hover { background: #f0f2f5; }
         #listaSalas li.ativa { background: #e7f5f3; color: #128c7e; font-weight: 600; }
 
-        /* ---- ÁREA DE MENSAGENS ---- */
         .chat-main { flex: 1; display: flex; flex-direction: column; }
 
         #mensagens {
@@ -191,7 +183,6 @@
             background: #ece5dd;
         }
 
-        /* Bolhas */
         .mensagem {
             max-width: 62%;
             padding: 8px 12px;
@@ -249,7 +240,6 @@
             align-self: center;
         }
 
-        /* ---- SIDEBAR MEMBROS ---- */
         .sidebar-membros {
             width: 190px;
             background: #fff;
@@ -301,7 +291,6 @@
             flex-shrink: 0;
         }
 
-        /* ---- BARRA DE ENVIO ---- */
         .barra-envio {
             background: #f0f2f5;
             border-top: 1px solid #ddd;
@@ -330,7 +319,6 @@
         #campoMensagem:focus { border-color: #128c7e; }
         #campoMensagem:disabled { background: #f5f5f5; cursor: not-allowed; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -338,7 +326,6 @@
 </head>
 <body>
 
-    <!-- TELA 1: LOGIN -->
     <div class="tela ativa" id="telaLogin">
         <div class="caixa-login">
             <h1>SENAI TEC</h1>
@@ -364,7 +351,6 @@
         </div>
     </div>
 
-    <!-- TELA 2: CADASTRO -->
     <div class="tela" id="telaCadastro">
         <div class="caixa-login">
             <h1>SENAI TEC</h1>
@@ -390,7 +376,6 @@
         </div>
     </div>
 
-    <!-- TELA 3: CHAT -->
     <div class="tela" id="telaChat">
         <div id="telaChatContainer">
 
@@ -405,7 +390,6 @@
 
             <div class="chat-body">
 
-                <!-- Sidebar Salas -->
                 <div class="sidebar">
                     <h3>Salas</h3>
                     <div class="criar-sala">
@@ -417,7 +401,6 @@
                     </ul>
                 </div>
 
-                <!-- Mensagens -->
                 <div class="chat-main">
                     <div id="mensagens">
                         <div class="aviso-sistema">Selecione uma sala para começar</div>
@@ -437,7 +420,6 @@
                     </div>
                 </div>
 
-                <!-- Sidebar Membros -->
                 <div class="sidebar-membros">
                     <h3>Membros</h3>
                     <p>Clique para envio privado</p>
@@ -452,18 +434,10 @@
 
 
     <script>
-        // =====================================================
-        // VARIÁVEIS GLOBAIS
-        // =====================================================
-
         let ws = null;
         let meuUsuario = '';
         let minhasSalaAtual = '';
         let membrosSelecionados = [];
-
-        // =====================================================
-        // CONECTAR AO WEBSOCKET
-        // =====================================================
 
         function conectarWebSocket() {
             ws = new WebSocket('ws://localhost:3000');
@@ -487,10 +461,6 @@
         }
 
         conectarWebSocket();
-
-        // =====================================================
-        // TRATAR MENSAGENS DO SERVIDOR
-        // =====================================================
 
         function tratarMensagemServidor(dados) {
 
@@ -554,10 +524,6 @@
             }
         }
 
-        // =====================================================
-        // AÇÕES DO USUÁRIO
-        // =====================================================
-
         function fazerCadastro() {
             const username = document.getElementById('cadUsuario').value.trim();
             const password = document.getElementById('cadSenha').value.trim();
@@ -607,9 +573,6 @@
             campo.value = '';
         }
 
-        // =====================================================
-        // FUNÇÕES DE INTERFACE
-        // =====================================================
 
         function mostrarTela(id) {
             document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
